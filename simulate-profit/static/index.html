@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit Simulation - Financial Intelligence Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Gradient -->
+    <div class="bg-gradient"></div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-icon">💰</div>
+                <div>
+                    <h1 class="app-title">Profit Simulation</h1>
+                    <p class="app-subtitle">High-Precision Financial Intelligence</p>
+                </div>
+            </div>
+            <div class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                <span>System Ready</span>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Panel - Input Form -->
+            <div class="panel input-panel">
+                <div class="panel-header">
+                    <h2>Simulation Parameters</h2>
+                    <p>Enter transaction details for profit analysis</p>
+                </div>
+                
+                <form id="simulationForm" class="simulation-form">
+                    <div class="form-group">
+                        <label for="productId">Coupon ID</label>
+                        <input 
+                            type="number" 
+                            id="productId" 
+                            name="product_id" 
+                            required 
+                            min="1"
+                            placeholder="Enter coupon ID"
+                        >
+                        <span class="input-hint">Numeric ID from products table</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="couponCode">Coupon Code <span class="optional">(Optional)</span></label>
+                        <input 
+                            type="text" 
+                            id="couponCode" 
+                            name="coupon_code" 
+                            placeholder="e.g., SUMMER2024"
+                        >
+                        <span class="input-hint">Leave empty for no discount</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentTermId">Payment Term ID</label>
+                        <input 
+                            type="number" 
+                            id="paymentTermId" 
+                            name="payment_term_id" 
+                            required 
+                            min="1"
+                            placeholder="Enter payment term ID"
+                        >
+                        <span class="input-hint">Payment terms from database</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <input 
+                            type="number" 
+                            id="quantity" 
+                            name="quantity" 
+                            required 
+                            min="0.001"
+                            step="0.001"
+                            value="1.000"
+                            placeholder="1.000"
+                        >
+                        <span class="input-hint">Decimal precision supported</span>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Calculate Profit</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Panel - Results -->
+            <div class="panel results-panel" id="resultsPanel">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📈</div>
+                    <h3>Ready for Analysis</h3>
+                    <p>Enter simulation parameters and click "Calculate Profit" to see detailed financial breakdown</p>
+                </div>
+
+                <div class="results-content" id="resultsContent" style="display: none;">
+                    <!-- Product Info -->
+                    <div class="product-info" id="productInfo"></div>
+
+                    <!-- Margin Analysis -->
+                    <div class="margin-analysis" id="marginAnalysis"></div>
+
+                    <!-- Waterfall Breakdown -->
+                    <div class="waterfall-section">
+                        <h3>💵 Financial Waterfall</h3>
+                        <div class="waterfall-items" id="waterfallItems"></div>
+                    </div>
+
+                    <!-- Scenarios Comparison -->
+                    <div class="scenarios-section">
+                        <h3>🔄 Scenario Comparison</h3>
+                        <div class="scenarios-grid" id="scenariosGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loadingState" style="display: none;">
+                    <div class="loader"></div>
+                    <p>Calculating profit simulation...</p>
+                </div>
+
+                <!-- Error State -->
+                <div class="error-state" id="errorState" style="display: none;">
+                    <div class="error-icon">⚠️</div>
+                    <h3>Calculation Error</h3>
+                    <p id="errorMessage"></p>
+                    <button class="retry-btn" onclick="hideError()">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
