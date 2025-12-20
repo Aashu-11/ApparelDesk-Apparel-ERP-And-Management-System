@@ -47,6 +47,20 @@ class SimilarProductsResponse(BaseModel):
     message: Optional[str] = None
 
 
+class OutfitItem(BaseModel):
+    item_id: str
+    score: float
+    category: str
+
+
+class OutfitMatchResponse(BaseModel):
+    base_item_id: str
+    base_category: Optional[str] = None
+    outfit_items: List[OutfitItem]
+    count: int
+    message: Optional[str] = None
+
+
 # Global engine reference
 engine: Optional[RecommenderEngine] = None
 
@@ -90,13 +104,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware for frontend access
+# CORS middleware for frontend access (including file:// origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=["*", "null"],  # 'null' is for file:// protocol
+    allow_credentials=False,  # Must be False when using wildcard origins
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
@@ -192,6 +207,70 @@ async def get_similar_products(
             for sim_id, score in similar
         ],
         count=len(similar)
+    )
+
+
+@app.get("/recommendations/outfit/{item_id}", response_model=OutfitMatchResponse)
+async def get_outfit_matches(
+    item_id: str,
+    limit: int = Query(default=20, ge=1, le=100, description="Number of recommendations to consider"),
+    limit_per_type: int = Query(default=1, ge=1, le=10, description="Max items per category")
+):
+    """
+    Get complementary outfit items for a product.
+    
+    When viewing jeans, this returns complementary items like shirts, shoes, jackets.
+    NOT items of the same type.
+    
+    - **item_id**: The base product ID (e.g., jeans)
+    - **limit**: How many similar items to consider (higher = more variety)
+    - **limit_per_type**: Maximum items per category type (default: 1)
+    """
+    if engine is None or not engine.is_loaded:
+        raise HTTPException(
+            status_code=503,
+            detail="Recommendation model not loaded"
+        )
+    
+    # Get base item's category for display
+    base_category = engine.item_descriptions.get(str(item_id))
+    
+    # First get similar items from the recommender
+    similar = engine.similar_items(item_id, limit=limit)
+    
+    if not similar:
+        return OutfitMatchResponse(
+            base_item_id=item_id,
+            base_category=base_category,
+            outfit_items=[],
+            count=0,
+            message=f"No outfit matches found. Item '{item_id}' may not exist in the training data."
+        )
+    
+    # Filter to complementary items only
+    outfit_matches = engine.get_outfit_matches(
+        base_item_id=item_id,
+        recommended_items=similar,
+        limit_per_type=limit_per_type
+    )
+    
+    if not outfit_matches:
+        return OutfitMatchResponse(
+            base_item_id=item_id,
+            base_category=base_category,
+            outfit_items=[],
+            count=0,
+            message=f"No complementary items found. Item '{item_id}' may not have category data."
+        )
+    
+    return OutfitMatchResponse(
+        base_item_id=item_id,
+        base_category=base_category,
+        outfit_items=[
+            OutfitItem(item_id=oid, score=round(score, 4), category=cat)
+            for oid, score, cat in outfit_matches
+        ],
+        count=len(outfit_matches)
     )
 
 

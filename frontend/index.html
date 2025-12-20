@@ -198,6 +198,10 @@
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         }
 
+        .card-icon.outfit {
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+        }
+
         .card-title {
             font-size: 1.25rem;
             font-weight: 600;
@@ -364,6 +368,30 @@
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 0.25rem;
+        }
+
+        .result-item-category {
+            display: inline-block;
+            font-size: 0.7rem;
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.15);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            margin-top: 0.5rem;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .base-category-badge {
+            display: inline-block;
+            background: var(--gradient-1);
+            color: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            text-transform: capitalize;
         }
 
         .empty-state {
@@ -565,6 +593,38 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Outfit Matching Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon outfit">👔</div>
+                    <div>
+                        <div class="card-title">Outfit Matching</div>
+                        <div class="card-subtitle">Find complementary items (jeans → shirt, shoes, jacket)</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <label for="outfitItemId">Base Item ID</label>
+                            <input type="text" id="outfitItemId" placeholder="Enter item ID (e.g., 1 for jeans)">
+                        </div>
+                        <div class="input-wrapper" style="max-width: 120px;">
+                            <label for="outfitLimitPerType">Per Category</label>
+                            <input type="number" id="outfitLimitPerType" value="1" min="1" max="10">
+                        </div>
+                    </div>
+                    <button onclick="fetchOutfitMatches()" id="outfitBtn">
+                        <span>👗</span> Match Outfit
+                    </button>
+                    <div class="results-container" id="outfitResults">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👔</div>
+                            <p class="empty-state-text">Enter an Item ID to find complementary outfit pieces</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <footer>
@@ -741,6 +801,98 @@
         document.getElementById('productId').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') fetchSimilarProducts();
         });
+
+        document.getElementById('outfitItemId').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchOutfitMatches();
+        });
+
+        // Fetch outfit matches
+        async function fetchOutfitMatches() {
+            const itemId = document.getElementById('outfitItemId').value;
+            const limitPerType = document.getElementById('outfitLimitPerType').value || 1;
+            const resultsContainer = document.getElementById('outfitResults');
+            const btn = document.getElementById('outfitBtn');
+
+            if (!itemId) {
+                resultsContainer.innerHTML = `
+                    <div class="message warning">
+                        ⚠️ Please enter an Item ID
+                    </div>
+                `;
+                return;
+            }
+
+            btn.disabled = true;
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Finding complementary outfit items...</span>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/recommendations/outfit/${itemId}?limit=30&limit_per_type=${limitPerType}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to fetch outfit matches');
+                }
+
+                renderOutfitResults(resultsContainer, data);
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="message error">
+                        ❌ ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Render outfit results with category badges
+        function renderOutfitResults(container, data) {
+            if (!data.outfit_items || data.outfit_items.length === 0) {
+                container.innerHTML = `
+                    <div class="message info">
+                        ℹ️ ${data.message || 'No complementary items found'}
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👔</div>
+                        <p class="empty-state-text">Try a different Item ID (1-25)</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            // Show base item category
+            if (data.base_category) {
+                html += `<div class="base-category-badge">Base: ${data.base_category}</div>`;
+            }
+
+            html += `
+                <div class="results-header">
+                    <span class="results-title">Complementary Items</span>
+                    <span class="results-count">${data.outfit_items.length} items</span>
+                </div>
+                <div class="results-grid">
+            `;
+
+            data.outfit_items.forEach((item, index) => {
+                html += `
+                    <div class="result-item" style="animation-delay: ${index * 0.05}s">
+                        <div class="result-item-id">#${item.item_id}</div>
+                        <div class="result-item-score">${item.score.toFixed(4)}</div>
+                        <div class="result-item-category">${item.category}</div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
 
         // Check health on page load
         checkHealth();
