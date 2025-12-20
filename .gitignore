@@ -1,0 +1,50 @@
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.Python
+
+# Logs
+logs/*
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Gradio cache
+gradio_cached_examples/
+flagged/
+
+# Model weights (if downloaded locally)
+*.bin
+*.safetensors
+*.ckpt
+weights/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build
+dist/
+build/
+*.egg-info/
