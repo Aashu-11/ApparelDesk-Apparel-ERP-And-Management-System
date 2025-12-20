@@ -6,9 +6,19 @@ Loads item descriptions from MySQL database.
 
 import csv
 import pickle
+import logging
+from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple, Optional, Union, Dict
 import numpy as np
+
+# Configure logging with colored output
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 
 class RecommenderEngine:
@@ -50,6 +60,14 @@ class RecommenderEngine:
         
         # Item descriptions for outfit matching
         self.item_descriptions: Dict[str, str] = {}
+        
+        # Track data source for logging
+        self.data_source = "none"
+        self.mysql_host = None
+        
+        logger.info("=" * 60)
+        logger.info("RECOMMENDER ENGINE STARTING")
+        logger.info("=" * 60)
         
         self._load_model(model_path)
         self._load_item_descriptions(item_descriptions_path, use_mysql)
@@ -100,25 +118,41 @@ class RecommenderEngine:
         1. MySQL database (if use_mysql=True and connection works)
         2. CSV file (fallback)
         """
+        logger.info("-" * 60)
+        logger.info("LOADING ITEM DESCRIPTIONS")
+        logger.info("-" * 60)
+        
         # Try MySQL first
         if use_mysql:
             try:
                 from data.mysql_loader import MySQLDataLoader
+                logger.info("Attempting MySQL connection...")
                 loader = MySQLDataLoader()
                 
                 if loader.connection:
+                    self.mysql_host = f"{loader.host}:{loader.port}/{loader.database}"
+                    logger.info(f"[MySQL] Connected to: {self.mysql_host}")
+                    
                     self.item_descriptions = loader.get_product_descriptions()
                     loader.close()
                     
                     if self.item_descriptions:
-                        print(f"[OUTFIT MATCHING] Loaded {len(self.item_descriptions)} descriptions from MySQL")
+                        self.data_source = "mysql"
+                        logger.info("=" * 60)
+                        logger.info(f"[MySQL] SUCCESS - Loaded {len(self.item_descriptions)} descriptions")
+                        logger.info(f"[MySQL] Data source: {self.mysql_host}")
+                        logger.info("=" * 60)
                         return
+                else:
+                    logger.warning("[MySQL] Connection failed - using CSV fallback")
             except ImportError:
-                print("[OUTFIT MATCHING] MySQL loader not available, using CSV")
+                logger.warning("[MySQL] mysql-connector-python not installed - using CSV fallback")
             except Exception as e:
-                print(f"[OUTFIT MATCHING] MySQL error: {e}, falling back to CSV")
+                logger.warning(f"[MySQL] Error: {e} - using CSV fallback")
         
         # Fallback to CSV
+        logger.info("Loading from CSV file (fallback)...")
+        
         if item_descriptions_path is None:
             base_path = Path(__file__).parent.parent / "data" / "item_descriptions.csv"
             item_descriptions_path = str(base_path)
@@ -126,7 +160,8 @@ class RecommenderEngine:
         path = Path(item_descriptions_path)
         
         if not path.exists():
-            print(f"[OUTFIT MATCHING] Warning: item_descriptions.csv not found at {path}")
+            logger.error(f"[CSV] File not found: {path}")
+            self.data_source = "none"
             return
         
         try:
@@ -137,9 +172,15 @@ class RecommenderEngine:
                     description = row["description"].strip().lower()
                     self.item_descriptions[item_id] = description
             
-            print(f"[OUTFIT MATCHING] Loaded {len(self.item_descriptions)} descriptions from CSV")
+            self.data_source = "csv"
+            logger.info("=" * 60)
+            logger.info(f"[CSV] FALLBACK - Loaded {len(self.item_descriptions)} descriptions")
+            logger.info(f"[CSV] File: {path}")
+            logger.info("=" * 60)
         except Exception as e:
-            print(f"[OUTFIT MATCHING] Error loading CSV: {e}")
+            logger.error(f"[CSV] Error loading file: {e}")
+            self.data_source = "none"
+            self.item_descriptions = {}
             self.item_descriptions = {}
 
     def reload_descriptions_from_mysql(self) -> bool:

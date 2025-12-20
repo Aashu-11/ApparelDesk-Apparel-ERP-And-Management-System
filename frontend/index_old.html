@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendation System | Test Console</title>
+    <meta name="description" content="Test console for E-commerce recommendation system API">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a25;
+            --bg-card-hover: #22222f;
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2a2a3a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-2: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.online {
+            background: var(--success);
+        }
+
+        .status-dot.offline {
+            background: var(--error);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.1);
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .card-icon.user {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        .card-icon.product {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .card-icon.outfit {
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .input-wrapper label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        input[type="number"]::placeholder,
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        button {
+            padding: 0.875rem 2rem;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-container {
+            min-height: 200px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .results-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .results-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .result-item {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            animation: fadeIn 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .result-item:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-item-score {
+            font-size: 0.85rem;
+            color: var(--accent-secondary);
+            font-weight: 500;
+        }
+
+        .result-item-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .result-item-category {
+            display: inline-block;
+            font-size: 0.7rem;
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.15);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            margin-top: 0.5rem;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .base-category-badge {
+            display: inline-block;
+            background: var(--gradient-1);
+            color: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            text-transform: capitalize;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 0.95rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .message.info {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--accent-secondary);
+        }
+
+        .message.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .status-bar {
+                gap: 1rem;
+            }
+
+            .status-item {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🎯</div>
+                <h1>Recommendation System</h1>
+            </div>
+            <p class="subtitle">Netflix-style ALS Collaborative Filtering • Test Console</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Checking API...</span>
+            </div>
+            <div class="status-item">
+                <span>👥 Users: <strong id="userCount">-</strong></span>
+            </div>
+            <div class="status-item">
+                <span>📦 Items: <strong id="itemCount">-</strong></span>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            <!-- User Recommendations Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon user">👤</div>
+                    <div>
+                        <div class="card-title">User Recommendations</div>
+                        <div class="card-subtitle">Get personalized product suggestions</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <label for="userId">User ID</label>
+                            <input type="text" id="userId" placeholder="Enter user ID (e.g., 1, 10, 100)">
+                        </div>
+                        <div class="input-wrapper" style="max-width: 100px;">
+                            <label for="userLimit">Limit</label>
+                            <input type="number" id="userLimit" value="10" min="1" max="100">
+                        </div>
+                    </div>
+                    <button onclick="fetchUserRecommendations()" id="userBtn">
+                        <span>🔍</span> Get Recommendations
+                    </button>
+                    <div class="results-container" id="userResults">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎯</div>
+                            <p class="empty-state-text">Enter a User ID to see recommendations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Similar Products Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon product">📦</div>
+                    <div>
+                        <div class="card-title">Similar Products</div>
+                        <div class="card-subtitle">Find products like this one</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <label for="productId">Product ID</label>
+                            <input type="text" id="productId" placeholder="Enter product ID (e.g., 1, 10, 100)">
+                        </div>
+                        <div class="input-wrapper" style="max-width: 100px;">
+                            <label for="productLimit">Limit</label>
+                            <input type="number" id="productLimit" value="10" min="1" max="100">
+                        </div>
+                    </div>
+                    <button onclick="fetchSimilarProducts()" id="productBtn">
+                        <span>🔍</span> Find Similar
+                    </button>
+                    <div class="results-container" id="productResults">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <p class="empty-state-text">Enter a Product ID to find similar items</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outfit Matching Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon outfit">👔</div>
+                    <div>
+                        <div class="card-title">Outfit Matching</div>
+                        <div class="card-subtitle">Find complementary items (jeans → shirt, shoes, jacket)</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <label for="outfitItemId">Base Item ID</label>
+                            <input type="text" id="outfitItemId" placeholder="Enter item ID (e.g., 1 for jeans)">
+                        </div>
+                        <div class="input-wrapper" style="max-width: 120px;">
+                            <label for="outfitLimitPerType">Per Category</label>
+                            <input type="number" id="outfitLimitPerType" value="1" min="1" max="10">
+                        </div>
+                    </div>
+                    <button onclick="fetchOutfitMatches()" id="outfitBtn">
+                        <span>👗</span> Match Outfit
+                    </button>
+                    <div class="results-container" id="outfitResults">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👔</div>
+                            <p class="empty-state-text">Enter an Item ID to find complementary outfit pieces</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>E-Commerce Recommendation API • <a href="/docs" target="_blank">API Docs</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Check API health on load
+        async function checkHealth() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const userCount = document.getElementById('userCount');
+            const itemCount = document.getElementById('itemCount');
+
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+
+                if (data.model_loaded) {
+                    statusDot.classList.add('online');
+                    statusDot.classList.remove('offline');
+                    statusText.textContent = 'Model Ready';
+                    userCount.textContent = data.num_users?.toLocaleString() || '-';
+                    itemCount.textContent = data.num_items?.toLocaleString() || '-';
+                } else {
+                    statusDot.classList.add('offline');
+                    statusDot.classList.remove('online');
+                    statusText.textContent = 'Model Not Loaded';
+                    userCount.textContent = '-';
+                    itemCount.textContent = '-';
+                }
+            } catch (error) {
+                statusDot.classList.add('offline');
+                statusDot.classList.remove('online');
+                statusText.textContent = 'API Offline';
+                userCount.textContent = '-';
+                itemCount.textContent = '-';
+            }
+        }
+
+        // Fetch user recommendations
+        async function fetchUserRecommendations() {
+            const userId = document.getElementById('userId').value;
+            const limit = document.getElementById('userLimit').value || 10;
+            const resultsContainer = document.getElementById('userResults');
+            const btn = document.getElementById('userBtn');
+
+            if (!userId) {
+                resultsContainer.innerHTML = `
+                    <div class="message warning">
+                        ⚠️ Please enter a User ID
+                    </div>
+                `;
+                return;
+            }
+
+            btn.disabled = true;
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Fetching recommendations...</span>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/recommendations/user/${userId}?limit=${limit}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to fetch recommendations');
+                }
+
+                renderResults(resultsContainer, data.recommendations, data.message, 'Product');
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="message error">
+                        ❌ ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Fetch similar products
+        async function fetchSimilarProducts() {
+            const productId = document.getElementById('productId').value;
+            const limit = document.getElementById('productLimit').value || 10;
+            const resultsContainer = document.getElementById('productResults');
+            const btn = document.getElementById('productBtn');
+
+            if (!productId) {
+                resultsContainer.innerHTML = `
+                    <div class="message warning">
+                        ⚠️ Please enter a Product ID
+                    </div>
+                `;
+                return;
+            }
+
+            btn.disabled = true;
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Finding similar products...</span>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/recommendations/product/${productId}?limit=${limit}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to fetch similar products');
+                }
+
+                renderResults(resultsContainer, data.similar_products, data.message, 'Product');
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="message error">
+                        ❌ ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Render results
+        function renderResults(container, items, message, label) {
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="message info">
+                        ℹ️ ${message || 'No results found'}
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p class="empty-state-text">Try a different ID</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="results-header">
+                    <span class="results-title">Results</span>
+                    <span class="results-count">${items.length} items</span>
+                </div>
+                <div class="results-grid">
+            `;
+
+            items.forEach((item, index) => {
+                html += `
+                    <div class="result-item" style="animation-delay: ${index * 0.05}s">
+                        <div class="result-item-id">#${item.item_id}</div>
+                        <div class="result-item-score">${item.score.toFixed(4)}</div>
+                        <div class="result-item-label">${label} ID</div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Enter key support
+        document.getElementById('userId').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchUserRecommendations();
+        });
+
+        document.getElementById('productId').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchSimilarProducts();
+        });
+
+        document.getElementById('outfitItemId').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchOutfitMatches();
+        });
+
+        // Fetch outfit matches
+        async function fetchOutfitMatches() {
+            const itemId = document.getElementById('outfitItemId').value;
+            const limitPerType = document.getElementById('outfitLimitPerType').value || 1;
+            const resultsContainer = document.getElementById('outfitResults');
+            const btn = document.getElementById('outfitBtn');
+
+            if (!itemId) {
+                resultsContainer.innerHTML = `
+                    <div class="message warning">
+                        ⚠️ Please enter an Item ID
+                    </div>
+                `;
+                return;
+            }
+
+            btn.disabled = true;
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Finding complementary outfit items...</span>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/recommendations/outfit/${itemId}?limit=30&limit_per_type=${limitPerType}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to fetch outfit matches');
+                }
+
+                renderOutfitResults(resultsContainer, data);
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="message error">
+                        ❌ ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Render outfit results with category badges
+        function renderOutfitResults(container, data) {
+            if (!data.outfit_items || data.outfit_items.length === 0) {
+                container.innerHTML = `
+                    <div class="message info">
+                        ℹ️ ${data.message || 'No complementary items found'}
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👔</div>
+                        <p class="empty-state-text">Try a different Item ID (1-25)</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            // Show base item category
+            if (data.base_category) {
+                html += `<div class="base-category-badge">Base: ${data.base_category}</div>`;
+            }
+
+            html += `
+                <div class="results-header">
+                    <span class="results-title">Complementary Items</span>
+                    <span class="results-count">${data.outfit_items.length} items</span>
+                </div>
+                <div class="results-grid">
+            `;
+
+            data.outfit_items.forEach((item, index) => {
+                html += `
+                    <div class="result-item" style="animation-delay: ${index * 0.05}s">
+                        <div class="result-item-id">#${item.item_id}</div>
+                        <div class="result-item-score">${item.score.toFixed(4)}</div>
+                        <div class="result-item-category">${item.category}</div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Check health on page load
+        checkHealth();
+        // Refresh health status every 30 seconds
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+
+</html>

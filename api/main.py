@@ -75,12 +75,23 @@ async def lifespan(app: FastAPI):
     
     try:
         engine = RecommenderEngine(str(model_path))
-        print(f"Model loaded successfully from {model_path}")
         model_info = engine.get_model_info()
-        print(f"  Users: {model_info['num_users']}, Items: {model_info['num_items']}")
         sample_ids = engine.get_sample_ids()
+        
+        print("\n" + "=" * 60)
+        print("API SERVER READY")
+        print("=" * 60)
+        print(f"  Model: {model_path}")
+        print(f"  Users: {model_info['num_users']}, Items: {model_info['num_items']}")
+        print(f"  Data Source: {engine.data_source.upper()}")
+        if engine.data_source == "mysql":
+            print(f"  MySQL Host: {engine.mysql_host}")
+        elif engine.data_source == "csv":
+            print(f"  Using CSV fallback")
         print(f"  Sample User IDs: {sample_ids['sample_user_ids'][:5]}")
         print(f"  Sample Item IDs: {sample_ids['sample_item_ids'][:5]}")
+        print("=" * 60 + "\n")
+        
     except FileNotFoundError as e:
         print(f"Warning: {e}")
         print("  API will start but recommendations will not be available.")
