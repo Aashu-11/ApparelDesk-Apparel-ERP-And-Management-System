@@ -7,3 +7,4 @@ xformers
 opencv-python
 requests
 gradio
+gradio_client
