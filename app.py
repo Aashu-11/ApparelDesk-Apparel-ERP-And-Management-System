@@ -20,7 +20,7 @@ print("Initializing Hugging Face Inference API client...")
 
 # Initialize the client for IDM-VTON (free tier)
 try:
-    hf_client = Client("yisol/IDM-VTON")
+    hf_client = Client("yisol/IDM-VTON", hf_token=os.environ.get("HF_TOKEN"))
     print("[OK] Connected to IDM-VTON Inference API")
     API_AVAILABLE = True
 except Exception as e:
