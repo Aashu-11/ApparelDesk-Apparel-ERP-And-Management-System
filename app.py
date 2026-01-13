@@ -8,6 +8,9 @@ from PIL import Image
 import io
 from gradio_client import Client, handle_file
 import tempfile
+import base64
+import json
+import requests
 
 # ============================================
 # Hugging Face Inference API (IDM-VTON)
@@ -419,4 +422,4 @@ with gr.Blocks() as Tryon:
     </div>
     """)
 
-Tryon.launch()
+Tryon.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 7860)))
